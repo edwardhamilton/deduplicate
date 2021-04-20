@@ -1,4 +1,4 @@
-class trainset_builder:
+class labeler:
 	def __init__(self, args):
 		self.args = args
 		self.num_matches = 0
@@ -14,7 +14,7 @@ class trainset_builder:
 		self.num_possible_matches_left = self.possible_matches.shape[0]
 		print('Begin labeling your training set (size = ' + str(self.possible_matches.shape[0]) + '):.  You will be prompted with possible matches.  Press (m) for match or (n) for not a match.  When done press (q)')
 		self.labeled_pairs = set()
-		
+
 		for i, row in self.possible_matches.iterrows():
 			left = int(row.left)
 			right = int(row.right)
@@ -23,12 +23,12 @@ class trainset_builder:
 				self.get_label_from_user(row)
 			else:
 				self.num_possible_matches_left = self.num_possible_matches_left - 1
-			
+
 		print('Classification Model Error in (loaded) training set was: false positives = ' + str(int((false_positives * 100.0) / total_weight)) + '%' + ', False negatives = ' + str(int((false_negatives * 100.0) / total_weight)) + '%')
 		print('Note: this is only classification modeling error.  Actual total error will be much lower.  However, each time we add more labels to the model, we hope that the error will decrease')
 		print('Writing ' + str(tf.shape[0]) + ' labeled training data to ' + args.buildtrainset)
 		tf.to_csv(os.path.join(args.path, args.buildtrainset), index=False)
-		
+
 	def create_labeled_training_row(match):
 		return {'left': left, 'right': right, 'distance': distance, 'match':match}
 	def label_match(self, row):
@@ -65,7 +65,7 @@ class trainset_builder:
 			print('You are starting with fresh training set')
 	def make_name_pair(left, right):
 		return self.df.iloc[left].standardized_name + '.' + self.df.iloc[right].standardized_name
-			
+
 	def generate_labeling_set(self):
 		print('First generate the set of possible matches that can be labelled')
 		self.deduplicator = deduplicator(self.args)
@@ -82,7 +82,7 @@ class trainset_builder:
 		self.labeled_pairs.add(make_name_pair(left, right))
 		print('\tDistance = ' + str(distance) + 'm , RestaurantId = ' + booleanSameDict[restaurantid_same] + ', Platform = ' + booleanSameDict[platform_same] + ', Match = ' + str(int(row.match * 100.0)) + '%')
 		print('\t' + _df.iloc[left].standardized_name.rjust(30) + '     <--->     ' + _df.iloc[right].standardized_name.ljust(30))
-	
+
 	def get_label_from_user(self, row):
 		key = getch()
 		if (key.lower() == b'm'):
