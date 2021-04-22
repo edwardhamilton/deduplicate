@@ -16,14 +16,16 @@ class partition: # requires that context has a geopanda dataframe named gdf and 
             return result
         logging.info('partition_or_match_region size = ' + str(len(indices)))
         xmin, ymin, xmax, ymax, partition_size, partition_span = self.get_bounds(indices)
-        cell_size = (xmax-xmin)/self.divisor
+        cell_xsize = (xmax-xmin)/self.divisor
+        cell_ysize = (ymax-ymin)/self.divisor
         grid_cells = []
-        for x0 in np.arange(xmin, xmax+cell_size, cell_size ):
-            for y0 in np.arange(ymin, ymax+cell_size, cell_size):
-                x1 = x0-cell_size
-                y1 = y0+cell_size
-            grid_cells.append( shapely.geometry.box(x0, y0, x1, y1)  )
+        for x0 in np.arange(xmin, xmax+cell_xsize, cell_xsize ):
+            for y0 in np.arange(ymin, ymax+cell_ysize, cell_ysize):
+                x1 = x0-cell_xsize
+                y1 = y0+cell_ysize
+                grid_cells.append(shapely.geometry.box(x0, y0, x1, y1))
         cells = geopandas.GeoDataFrame(grid_cells, columns=['geometry'])
+        print('# cells = ' + str(len(cells)) + ', xrange = ' + str(xmax - xmin) + ', yrange = ' + str(ymax - ymin))
         merged = geopandas.sjoin(self.gdf.iloc[indices], cells, how='inner', op='within')
         groups = merged.groupby('index_right').groups
         for r in groups.values():

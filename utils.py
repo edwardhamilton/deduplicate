@@ -1,4 +1,15 @@
 from math import radians, cos, sin, asin, sqrt
+import numpy as np
+
+#todo need to add this back in otherwise clustering will not be correct
+def order_pair(left, right):  # this makes it easier to assign cluster id, as first in match pair.
+	if (left <= right):
+		return left, right
+	return right, left
+
+def randfloat(f, t, size):
+	return f + np.random.random(size=size) * (t - f)
+
 def haversine(lon1, lat1, lon2, lat2):
 	"""
 	Calculate the great circle distance between two points

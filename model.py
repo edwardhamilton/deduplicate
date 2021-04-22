@@ -1,7 +1,7 @@
 class model:
 	def __init__(self, context):
 		self.context = context
-		self.xgbc = XGBClassifier()
+		self.xgbc = None
 	def predict_matches(self, df):
 		df = df.add_features(df)
 		if (self.xgbc != None):
@@ -32,9 +32,10 @@ class model:
 		return df.merge(df.apply(lambda x: self.get_match_features), left_index=True, right_index=True)
 	def get_X(df):
 		return df[['distance', 'fuzz_ratio', 'fuzz_partial_ratio', 'fuzz_token_set_ratio', 'len_ratio', 'words_ratio', 'entityid_same', 'platform_same']]
-	def train(self, file):
+	def train(self, path, file):
+		self.xgbc = XGBClassifier()
 		print('Training prediction model on file ' + str(file))
-		tf = pd.read_csv(os.path.join(self.context.args.path, file))
+		tf = pd.read_csv(os.path.join(path, file))
 		tf = self.add_features(tf)
 		tf.match = (tf.match == 'T').astype(bool)
 		X = get_X(tf)
