@@ -5,8 +5,8 @@ import numpy as np
 import shapely
 # partitions a panda dataframe (with geometry)
 class partition: # requires that context has a geopanda dataframe named gdf and a context object with partition_divisor, max_partition_span, and max_partition_size
-    def __init__(self, gdf, divisor, max_span, max_size):
-        self.gdf = gdf
+    def __init__(self, data, divisor, max_span, max_size):
+        self.gdf = data
         self.divisor = divisor
         self.max_span = max_span
         self.max_size = max_size

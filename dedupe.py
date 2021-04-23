@@ -1,28 +1,15 @@
-class deduplicator:
-	class context:
-		def __init__(self):
-			pass
-		def initialize(self, args, df, model):
-			self.args = args
-			self.df = df
-			self.model = model
+import parallelize
+import numpy as np
 
-	def __init__(self, args)
-		self.args = args
-		self.context = context()
-
-	def run(self):  #assigns a same cluster # to records that are the same business entity
-		assign_cluster(self.generate_matches())
-	def generate_matches(self):
-		self.df = pd.read_csv(os.path.join(self.args.path, self.args.runfile), sep = chr(1))
-		self.model = model(self.context)
-		self.context = context.initialize(self.args, self.df, self.model)
-		self.prepare_data()   # cleaning up and some preprocessing
-		if (self.args.train_file != None):
-			self.model.train(self.args, self.args.train_file) # indices must match between run file and train file
-		print('Starting matching on ' + str(len(entired_region)) + ' records, using prediction model at ' + str(time.perf_counter()))
-		job = list(if (args.sample != None) gdf.sample(args.sample).index else gdf.index))
-		return collect_matches(parallelize(context, partition, match, job).results)
+class dedupe:
+	# data has already been cleaned
+	def __init__(self, data, partition, match):
+		self.df = data
+		self.partition = partition_size
+		self.match = match
+	def run(self, sample = None):  #assigns a same cluster # to records that are the same business entity
+		job = list(self.df.sample(sample).index if (sample != None) else self.df.index)
+		return collect_matches(cluster(self.df, cluster='cluster', to='to', match='match').run(parallelize(partition, match).run(job)))
 	def collect_matches(results):
 		print('Aggregating results: ' + str(len(results)))
 

@@ -1,6 +1,7 @@
 from math import radians, cos, sin, asin, sqrt
 import numpy as np
 import pandas as pd
+from random import random
 
 #todo need to add this back in otherwise clustering will not be correct
 def order_pair(left, right):  # this makes it easier to assign cluster id, as first in match pair.
@@ -10,6 +11,12 @@ def order_pair(left, right):  # this makes it easier to assign cluster id, as fi
 
 def randfloat(f, t, size):
 	return f + np.random.random(size=size) * (t - f)
+
+def order_columns_ascending(df, a, b):
+	df[a], df[b] = np.where(df[a] < df[b], [df[a], df[b]], [df[b], df[a]])  # make sure smaller number is the cluster
+
+def swap_columns_randomly(df, a, b):
+	df[a], df[b] = np.where(random() > .5, [df[a], df[b]], [df[b], df[a]])   # randomly swap left and right.
 
 def haversine(lon1, lat1, lon2, lat2):
 	"""

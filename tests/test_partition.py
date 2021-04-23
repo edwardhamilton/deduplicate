@@ -18,7 +18,7 @@ class Test_Partition(unittest.TestCase):
         self.df = pd.DataFrame(self.data)
         self.gdf = geopandas.GeoDataFrame(self.df, geometry=geopandas.points_from_xy(self.df.lng, self.df.lat))
     def __test_partition(self, divisor):
-        partitions = partition.partition(gdf=self.gdf, divisor=divisor, max_span=1000000000, max_size=10).run(self.gdf.index)
+        partitions = partition.partition(data=self.gdf, divisor=divisor, max_span=1000000000, max_size=10).run(self.gdf.index)
         self.assertEqual(len(partitions), math.pow(divisor, 2))
         unique_records = set(list(np.concatenate(partitions).flat))
         self.assertEqual(len(unique_records), self.size)
