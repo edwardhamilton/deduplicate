@@ -5,14 +5,14 @@ import utils
 import re
 
 class loader:
-	def __init__(self, entity_name, platform, entity_id, sample):
+	def __init__(self, entity_name, platform, entity_id, sample = None):
 		self.entity_name = entity_name
 		self.platform = platform
 		self.entity_id = entity_id
 		self.sample = sample
 	# sep = chr(1)
 	def run(self, path, file, sep):  #assigns a same cluster # to records that are the same business entity
-		self.df = pd.read_csv(os.path.join(path, file), sep = sep).sample(self.sample)
+		self.df = pd.read_csv(os.path.join(path, file), sep = sep)
 		df = self.df
 		df.rename(columns={self.entity_name: 'entity_name'}, inplace=True)
 		df.rename(columns={self.platform: 'platform'}, inplace=True)
@@ -22,7 +22,11 @@ class loader:
 		df.reset_index(drop=True, inplace=True)  #so index has now holes
 		self.__simple_standardization_ofnames()
 		print('Simple standardization: df.shape = ' + str(self.df.shape) +  ': reduced from ' + str(len(self.df.entity_name.unique())) + ' to ' + str(len(self.df.standardized_name.unique())) + ' unique names')
-		return geopandas.GeoDataFrame(df, geometry=geopandas.points_from_xy(df.longitude, df.latitude))
+		df = geopandas.GeoDataFrame(df, geometry=geopandas.points_from_xy(df.longitude, df.latitude))
+		if (self.sample != None):
+			df = df.sample(self.sample)
+		return df
+
 	def __clean_and_remove_inactive(self):
 		df = self.df
 		boolMap = {True : True, False : False, 'TRUE': True, 'True': True, 'FALSE': False, 'False': False}

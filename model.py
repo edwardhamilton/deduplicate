@@ -1,23 +1,33 @@
+from fuzzywuzzy import fuzz
+from xgboost import XGBClassifier
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, KFold
+import pandas as pd
+import os
+import utils
+
 class model:
-	def __init__(self, context):
-		self.context = context
+	def __init__(self, df, match_probability):
+		self.df = df
+		self.match_probability = match_probability
 		self.xgbc = None
-	def predict_matches(self, df):
-		df = df.add_features(df)
+	def predict(self, df): # df has 2 columns 'left' and 'right' which index into self.df
+		df = self.add_features(df)
 		if (self.xgbc != None):
-			X = get_X(df)
-			df.match = self.xgbc.predict_proba(X).T[1].astype(float)
+			X = model.get_X(df)
+			df['match'] = self.xgbc.predict_proba(X).T[1].astype(float)
 		else:
-			df.match = (df.fuzz_ratio / 100.0).astype(float)    # fuzz_ratio is between 0 - 100 but predict_proba is between 0.0 and 1.0
-		df.match = df[df.match > self.context.config.match_probability]		# filter out bad matches
+			df['match'] = (df.fuzz_ratio / 100.0).astype(float)    # fuzz_ratio is between 0 - 100 but predict_proba is between 0.0 and 1.0
+		df['match'] = df[df.match > self.match_probability]		# filter out bad matches
 		return df
-	def get_match_features(self, x):
+	def get_features(self, x):
 		left = x.left
 		right = x.right
-		gdf = self.context.gdf
-		lt = gdf.iloc[left]
-		rt = gdf.iloc[right]
-		distance = get_distance(lt, rt)
+		df = self.df
+		lt = df.iloc[left]
+		rt = df.iloc[right]
+		distance = utils.get_distance(lt, rt)
 		ltName = lt.entity_name.replace('_', ' ')
 		rtName = rt.entity_name.replace('_', ' ')
 		fuzz_ratio = fuzz.ratio(ltName, rtName)
@@ -27,18 +37,19 @@ class model:
 		words_ratio = abs((ltName.count(' ') + 1) - (rtName.count(' ') + 1)) / max(ltName.count(' ') + 1, rtName.count(' ') + 1)
 		entityid_same = lt.entity_id == rt.entity_id
 		platform_same = lt.platform == rt.platform
-		return distance, fuzz_ratio, fuzz_partial_ratio, fuzz_token_set_ratio, len_ratio, words_ratio, restaurantid_same, platform_same
-	def add_features(df):
-		return df.merge(df.apply(lambda x: self.get_match_features), left_index=True, right_index=True)
+		return [distance, fuzz_ratio, fuzz_partial_ratio, fuzz_token_set_ratio, len_ratio, words_ratio, entityid_same, platform_same]
+	def add_features(self, df):
+		return utils.apply(df, self.get_features, {'distance':float, 'fuzz_ratio':int, 'fuzz_partial_ratio':int, 'fuzz_token_set_ratio':int, 'len_ratio':float, 'words_ratio':float, 'entityid_same':bool, 'platform_same':bool})
 	def get_X(df):
 		return df[['distance', 'fuzz_ratio', 'fuzz_partial_ratio', 'fuzz_token_set_ratio', 'len_ratio', 'words_ratio', 'entityid_same', 'platform_same']]
 	def train(self, path, file):
 		self.xgbc = XGBClassifier()
 		print('Training prediction model on file ' + str(file))
 		tf = pd.read_csv(os.path.join(path, file))
+		tf.drop('distance', axis=1, inplace = True)
 		tf = self.add_features(tf)
 		tf.match = (tf.match == 'T').astype(bool)
-		X = get_X(tf)
+		X = model.get_X(tf)
 		y = tf.match
 		Xtrain, Xtest, ytrain, ytest=train_test_split(X, y, test_size=0.15)
 		self.xgbc.fit(Xtrain, ytrain)

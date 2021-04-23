@@ -1,5 +1,6 @@
 from math import radians, cos, sin, asin, sqrt
 import numpy as np
+import pandas as pd
 
 #todo need to add this back in otherwise clustering will not be correct
 def order_pair(left, right):  # this makes it easier to assign cluster id, as first in match pair.
@@ -29,6 +30,15 @@ def is_outofrange(f, t, x):
 	return (x < f) | (x > t)
 def get_distance(lt, rt):
 	return int(haversine(lt.longitude, lt.latitude, rt.longitude, rt.latitude) * 1000.0)
+
+def apply(df, func, columns):
+	s = df.apply(lambda x: func(x), axis=1)
+	tf = pd.DataFrame.from_dict(dict(zip(s.index, s.values))).T
+	tf.columns = list(columns.keys())
+	df = df.merge(tf, left_index=True, right_index=True)
+	return df.astype(columns)
+
+
 
 class Range(object):
 	def __init__(self, start, end):
