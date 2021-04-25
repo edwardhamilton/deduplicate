@@ -14,6 +14,8 @@ import utils
 class Test_Filter(unittest.TestCase):
     @utils.ignore_warnings
     def test_simple(self):
-        helpers.load_filtered_dataset()  # just testing that it doesn't crash
+        df, filtered = helpers.load_filtered_dataset()  # just testing that it doesn't crash
+        print(filtered)
+
 if __name__ == '__main__':
     unittest.main()

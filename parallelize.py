@@ -43,7 +43,9 @@ class parallelize:
             while context.jobs.qsize() > 0:
                 job = context.jobs.get()
                 if (context.map.done(job)):
-                    context.results.put(context.reduce.run(job))
+                    reduced = context.reduce.run(job)
+                    if (reduced is not None):
+                        context.results.put(reduced)
                 else:
                     for i in context.map.run(job):
                         context.jobs.put(i)

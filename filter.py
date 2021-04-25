@@ -4,9 +4,10 @@ import sparse_dot_topn.sparse_dot_topn as ct
 from sparse_dot_topn import awesome_cossim_topn
 import pandas as pd
 import numpy as np
+import utils
 
-class filter:
-    def __init__(self, df, ngram_range, min_name_vectorization_word_frequency, max_name_vectorization_word_frequency, topn_by_cosine_similarity, min_cosine_similarity, topn_matches_to_apply_model_to):
+class filter:  # generates a set of possible matches
+    def __init__(self, df, ngram_range, min_name_vectorization_word_frequency, max_name_vectorization_word_frequency, topn_by_cosine_similarity, min_cosine_similarity, topn_matches_to_apply_model_to, max_distance):
         self.df = df
         self.ngram_range = ngram_range
         self.max_name_vectorization_word_frequency = max_name_vectorization_word_frequency
@@ -14,6 +15,11 @@ class filter:
         self.topn_by_cosine_similarity = topn_by_cosine_similarity
         self.min_cosine_similarity = min_cosine_similarity
         self.topn_matches_to_apply_model_to = topn_matches_to_apply_model_to
+        self.max_distance = max_distance
+    def get_distance(self, x):
+        return [utils.get_distance(self.df.iloc[x.left], self.df.iloc[x.right])]
+    def add_distance(self, df):
+        return utils.apply(df, self.get_distance, {'distance':float})
     def run(self, indices):
         df = self.df.iloc[indices]
         try:  # name vectorization
@@ -30,4 +36,6 @@ class filter:
         df = pd.DataFrame(data=np.dstack((indices[non_zeros[0][:top_n_rows]], non_zeros[1][:top_n_rows]))[0], columns = ['left', 'right'])
         df.left = df.left.astype(int)
         df.right = df.right.astype(int)
-        return df
+        df = self.add_distance(df)
+        df = df[df.distance < self.max_distance]		# filter out bad matches
+        return df[['left', 'right']]
