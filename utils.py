@@ -2,6 +2,20 @@ from math import radians, cos, sin, asin, sqrt
 import numpy as np
 import pandas as pd
 from random import random
+import warnings
+
+def sample_index(df, sample = None):
+	return list(df.sample(sample).index if (sample != None) else df.index)
+
+
+
+def ignore_warnings(test_func):
+    def do_test(self, *args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            test_func(self, *args, **kwargs)
+    return do_test
+
 
 #todo need to add this back in otherwise clustering will not be correct
 def order_pair(left, right):  # this makes it easier to assign cluster id, as first in match pair.

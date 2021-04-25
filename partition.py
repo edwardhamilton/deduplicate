@@ -25,11 +25,11 @@ class partition: # requires that context has a geopanda dataframe named gdf and 
                 y1 = y0+cell_ysize
                 grid_cells.append(shapely.geometry.box(x0, y0, x1, y1))
         cells = geopandas.GeoDataFrame(grid_cells, columns=['geometry'])
-        print('# cells = ' + str(len(cells)) + ', xrange = ' + str(xmax - xmin) + ', yrange = ' + str(ymax - ymin))
+        logging.info('# cells = ' + str(len(cells)) + ', xrange = ' + str(xmax - xmin) + ', yrange = ' + str(ymax - ymin))
         merged = geopandas.sjoin(self.gdf.iloc[indices], cells, how='inner', op='within')
         groups = merged.groupby('index_right').groups
         for r in groups.values():
-            result.append(r) #, timeout=_timeout)
+            result.append(list(r)) #, timeout=_timeout)
         return result
     def get_bounds(self, indices):
         tolerance = .0001 # about 11 meters.   Need this, otherwise we lose some records

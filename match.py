@@ -11,9 +11,10 @@ class match:
         if ((len(indices) > 1)): # & False): # no need to check if region only has 1 item
             logging.info('matching partition of size = ' + str(len(indices)))
             indices = np.array(indices)
-            matches_df = self.model.predict(self.filter.run(indices))
+            filtered = self.filter.run(indices)
+            matches_df = self.model.predict(filtered)
             matches = matches_df[['left', 'right', 'match']].values.tolist()
         else:
-            logging('partition has only 1 element so matching not needed ')
+            logging.info('partition has only 1 element so matching not needed ')
         logging.info('adding to results: partition = ' + str(len(indices)) + ', # matches = ' + str(len(matches)))
         return (indices, matches)

@@ -25,6 +25,7 @@ class loader:
 		df = geopandas.GeoDataFrame(df, geometry=geopandas.points_from_xy(df.longitude, df.latitude))
 		if (self.sample != None):
 			df = df.sample(self.sample)
+			df.reset_index();
 		return df
 
 	def __clean_and_remove_inactive(self):

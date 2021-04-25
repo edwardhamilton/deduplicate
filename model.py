@@ -19,7 +19,7 @@ class model:
 			df['match'] = self.xgbc.predict_proba(X).T[1].astype(float)
 		else:
 			df['match'] = (df.fuzz_ratio / 100.0).astype(float)    # fuzz_ratio is between 0 - 100 but predict_proba is between 0.0 and 1.0
-		df['match'] = df[df.match > self.match_probability]		# filter out bad matches
+		df = df[df.match > self.match_probability]		# filter out bad matches
 		return df
 	def get_features(self, x):
 		left = x.left

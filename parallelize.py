@@ -1,6 +1,13 @@
 import multiprocessing
 import os
 import logging
+
+class null_reduce:
+    def __init__(self):
+        pass
+    def run(self, job):
+        return job
+
 class parallelize:
     class _context:
         def __init__(self, map, reduce, jobs, results):

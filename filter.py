@@ -27,4 +27,7 @@ class filter:
         sparserows = non_zeros[0]
         sparsecols = non_zeros[1]
         top_n_rows = min(self.topn_matches_to_apply_model_to, sparsecols.size)
-        return pd.DataFrame(data=np.dstack((indices[non_zeros[0][:top_n_rows]], non_zeros[1][:top_n_rows]))[0], columns = ['left', 'right'])
+        df = pd.DataFrame(data=np.dstack((indices[non_zeros[0][:top_n_rows]], non_zeros[1][:top_n_rows]))[0], columns = ['left', 'right'])
+        df.left = df.left.astype(int)
+        df.right = df.right.astype(int)
+        return df
