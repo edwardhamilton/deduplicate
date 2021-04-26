@@ -22,7 +22,7 @@ class Test_Model(unittest.TestCase):
     def test_without_training(self):
         prediction = self.model.predict(self.possible_matches)
     @utils.ignore_warnings
-    def test_with_training(self):
+    def __test_with_training(self):
         self.model.train(path = 'datasets', file = 'trainset.csv')
         prediction = self.model.predict(self.possible_matches)
 

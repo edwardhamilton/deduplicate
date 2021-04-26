@@ -29,6 +29,8 @@ class model:
 		self.match_probability = match_probability
 		self.xgbc = None
 	def predict(self, df): # df has 2 columns 'left' and 'right' which index into self.df
+		if (df.empty):
+			return df
 		df = self.add_features(df)
 		if (self.xgbc != None):
 			X = model.get_X(df)

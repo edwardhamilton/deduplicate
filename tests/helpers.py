@@ -26,7 +26,7 @@ def load_dataset():
 def create_filter(df):
     return filter.filter(df, ngram_range=(1,3), min_name_vectorization_word_frequency=0.0,
         max_name_vectorization_word_frequency=.8, topn_by_cosine_similarity=20,
-        min_cosine_similarity=.2, topn_matches_to_apply_model_to=5000, max_distance=150)
+        min_cosine_similarity=.2, topn_matches_to_apply_model_to=1000, max_distance=150)
 
 def load_filtered_dataset():
     df = load_dataset()
