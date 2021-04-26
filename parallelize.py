@@ -19,7 +19,7 @@ class parallelize:
         self.num_processes, self.map, self.reduce = num_processes, map, reduce
     def run(self, job):
         num_processes = min(self.num_processes, os.cpu_count() - 1)
-        context = parallelize._context(self.map, self.reduce, jobs = multiprocessing.JoinableQueue(), results = multiprocessing.Queue())
+        context = parallelize._context(self.map, self.reduce, jobs = multiprocessing.JoinableQueue() if num_processes > 1 else multiprocessing.Queue(), results = multiprocessing.Queue())
         context.jobs.put(job)
         processes = []
         if (num_processes > 1):
@@ -49,7 +49,7 @@ class parallelize:
                 else:
                     for i in context.map.run(job):
                         context.jobs.put(i)
-                context.jobs.task_done()
+                #context.jobs.task_done()
         except multiprocessing.TimeoutError:
             logging.info('process timed out')
         finally:

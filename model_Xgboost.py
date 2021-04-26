@@ -7,44 +7,26 @@ import pandas as pd
 import os
 import utils
 import numpy as np
+import model_Fuzz
 
-class predict:  # this is a reduce that returns full prediction information (with features).  Maybe be useful for debugging
-	def __init__(self, filter, model):
-		self.filter = filter
-		self.model = model
-	def run(self, indices):
-		if ((len(indices) > 1)): # & False): # no need to check if region only has 1 item
-			indices = np.array(indices)
-			if (self.filter != None):
-				filtered = self.filter.run(indices)
-			else:
-				filtered = indices
-			matches_df = self.model.predict(filtered)
-			if (matches_df.shape[0] > 0):
-				return matches_df
-		return None
-class model:
+class model_Xgboost(model_Fuzz.model_Fuzz):
 	def __init__(self, df, match_probability):
-		self.df = df
-		self.match_probability = match_probability
+		super().__init__(df, match_probability)
 		self.xgbc = None
 	def predict(self, df): # df has 2 columns 'left' and 'right' which index into self.df
-		if (df.empty):
-			return df
+		if ((self.xgbc is None) | df.empty):
+			return super().predict(df)
 		df = self.add_features(df)
-		if (self.xgbc != None):
+		try:
 			X = model.get_X(df)
 			df['match'] = self.xgbc.predict_proba(X).T[1].astype(float)
-		else:
-			df['match'] = (df.fuzz_ratio / 100.0).astype(float)    # fuzz_ratio is between 0 - 100 but predict_proba is between 0.0 and 1.0
+		except:
+			print('catch: 1')
+			df['match'] = 0.0
 		df = df[df.match > self.match_probability]		# filter out bad matches
 		return df
 	def get_features(self, x):
-		left = x.left
-		right = x.right
-		df = self.df
-		lt = df.iloc[left]
-		rt = df.iloc[right]
+		lt, rt = super.map_indices_to_rows(x)
 		distance = utils.get_distance(lt, rt)
 		ltName = lt.entity_name.replace('_', ' ')
 		rtName = rt.entity_name.replace('_', ' ')
@@ -59,7 +41,12 @@ class model:
 	def add_features(self, df):
 		return utils.apply(df, self.get_features, {'distance':float, 'fuzz_ratio':int, 'fuzz_partial_ratio':int, 'fuzz_token_set_ratio':int, 'len_ratio':float, 'words_ratio':float, 'entityid_same':bool, 'platform_same':bool})
 	def get_X(df):
-		return df[['distance', 'fuzz_ratio', 'fuzz_partial_ratio', 'fuzz_token_set_ratio', 'len_ratio', 'words_ratio', 'entityid_same', 'platform_same']]
+		try:
+			return df[['distance', 'fuzz_ratio', 'fuzz_partial_ratio', 'fuzz_token_set_ratio', 'len_ratio', 'words_ratio', 'entityid_same', 'platform_same']]
+		except:
+			print('catch')
+			#print(df)
+			return pd.DataFrame({'distance':[], 'fuzz_ratio':[], 'fuzz_partial_ratio':[], 'fuzz_token_set_ratio':[], 'len_ratio':[], 'words_ratio':[], 'entityid_same':[], 'platform_same':[]})
 	def train(self, path, file):
 		self.xgbc = XGBClassifier()
 		print('Training prediction model on file ' + str(file))

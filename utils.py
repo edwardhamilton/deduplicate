@@ -53,13 +53,16 @@ def get_distance(lt, rt):
 	return int(haversine(lt.longitude, lt.latitude, rt.longitude, rt.latitude) * 1000.0)
 
 def apply(df, func, columns):
-	s = df.apply(lambda x: func(x), axis=1)
-	tf = pd.DataFrame.from_dict(dict(zip(s.index, s.values))).T
-	tf.columns = list(columns.keys())
-	df = df.merge(tf, left_index=True, right_index=True)
-	return df.astype(columns)
-
-
+	try:
+		s = df.apply(lambda x: func(x), axis=1)
+		tf = pd.DataFrame.from_dict(dict(zip(s.index, s.values))).T
+		tf.columns = list(columns.keys())
+		df = df.merge(tf, left_index=True, right_index=True)
+		return df.astype(columns)
+	except:
+		print('except: in apply')
+		print(df, columns)
+		return df
 
 class Range(object):
 	def __init__(self, start, end):

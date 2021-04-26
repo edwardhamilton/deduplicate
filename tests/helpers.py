@@ -6,7 +6,7 @@ import sys
 sys.path.append('../')
 import utils
 import loader
-import filter
+import filter_TfidfCosSimilar_and_Distance
 
 def generate_random_match_pairs(size, num_clusters):
     df = pd.DataFrame({ 'cluster_id' : np.random.randint(low=0, high=num_clusters, size=size) })
@@ -24,7 +24,7 @@ def load_dataset():
     return loader.loader('name', 'platform', 'restaurant_id').run(path = 'datasets', file = 'dataset1.csv', sep = chr(1))
 
 def create_filter(df):
-    return filter.filter(df, ngram_range=(1,3), min_name_vectorization_word_frequency=0.0,
+    return filter_TfidfCosSimilar_and_Distance.filter_TfidfCosSimilar_and_Distance(df, ngram_range=(1,3), min_name_vectorization_word_frequency=0.0,
         max_name_vectorization_word_frequency=.8, topn_by_cosine_similarity=20,
         min_cosine_similarity=.2, topn_matches_to_apply_model_to=1000, max_distance=150)
 

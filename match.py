@@ -1,7 +1,6 @@
 import numpy as np
 import logging
 import model
-import filter
 class match:
     def __init__(self, filter, model):
         self.filter = filter
