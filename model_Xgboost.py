@@ -7,26 +7,21 @@ import pandas as pd
 import os
 import utils
 import numpy as np
-import model_Fuzz
+import model
 
-class model_Xgboost(model_Fuzz.model_Fuzz):
-	def __init__(self, df, match_probability):
+class model_Xgboost(model.model):
+	def __init__(self, df, match_probability, path, train_file):
 		super().__init__(df, match_probability)
-		self.xgbc = None
-	def predict(self, df): # df has 2 columns 'left' and 'right' which index into self.df
-		if ((self.xgbc is None) | df.empty):
-			return super().predict(df)
-		df = self.add_features(df)
+		self.train(path, train_file)
+	def predict(self, df):
 		try:
-			X = model.get_X(df)
-			df['match'] = self.xgbc.predict_proba(X).T[1].astype(float)
+			X = model_Xgboost.get_X(df)
+			return self.xgbc.predict_proba(X).T[1].astype(float)
 		except:
 			print('catch: 1')
-			df['match'] = 0.0
-		df = df[df.match > self.match_probability]		# filter out bad matches
-		return df
+			return 0.0
 	def get_features(self, x):
-		lt, rt = super.map_indices_to_rows(x)
+		lt, rt = super().map_indices_to_rows(x)
 		distance = utils.get_distance(lt, rt)
 		ltName = lt.entity_name.replace('_', ' ')
 		rtName = rt.entity_name.replace('_', ' ')
@@ -44,8 +39,7 @@ class model_Xgboost(model_Fuzz.model_Fuzz):
 		try:
 			return df[['distance', 'fuzz_ratio', 'fuzz_partial_ratio', 'fuzz_token_set_ratio', 'len_ratio', 'words_ratio', 'entityid_same', 'platform_same']]
 		except:
-			print('catch')
-			#print(df)
+			print('catch5')
 			return pd.DataFrame({'distance':[], 'fuzz_ratio':[], 'fuzz_partial_ratio':[], 'fuzz_token_set_ratio':[], 'len_ratio':[], 'words_ratio':[], 'entityid_same':[], 'platform_same':[]})
 	def train(self, path, file):
 		self.xgbc = XGBClassifier()
@@ -54,7 +48,7 @@ class model_Xgboost(model_Fuzz.model_Fuzz):
 		tf.drop('distance', axis=1, inplace = True)
 		tf = self.add_features(tf)
 		tf.match = (tf.match == 'T').astype(bool)
-		X = model.get_X(tf)
+		X = model_Xgboost.get_X(tf)
 		y = tf.match
 		Xtrain, Xtest, ytrain, ytest=train_test_split(X, y, test_size=0.15)
 		self.xgbc.fit(Xtrain, ytrain)

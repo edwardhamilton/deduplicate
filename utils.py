@@ -61,7 +61,7 @@ def apply(df, func, columns):
 		return df.astype(columns)
 	except:
 		print('except: in apply')
-		print(df, columns)
+		print(df)
 		return df
 
 class Range(object):

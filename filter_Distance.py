@@ -17,9 +17,9 @@ class filter_Distance:  # generates a set of possible matches
         df.left = df.left.astype(int)
         df.right = df.right.astype(int)
         df = self.add_distance(df)
-        df = df[df.distance < self.max_distance]		# filter out bad matches
+        df = df[(df.distance < self.max_distance) & (df.left != df.right)]		# filter out bad matches
         df = df.drop(['distance'], axis = 1)
-        return df[['left', 'right']]
+        return df[['left', 'right']].values.tolist()
 
     def run(self, indices):
         return self.filter_bydistance(itertools.combinations(indices, 2))

@@ -11,8 +11,6 @@ class match:
             logging.info('matching partition of size = ' + str(len(indices)))
             indices = np.array(indices)
             filtered = self.filter.run(indices)
-            if (filtered.empty == False):
-                matches_df = self.model.predict(filtered)
-                matches = matches_df[['left', 'right', 'match']].values.tolist()
+            matches = self.model.run(filtered)
         logging.info('adding to results: partition = ' + str(len(indices)) + ', # matches = ' + str(len(matches)))
         return (indices, matches)

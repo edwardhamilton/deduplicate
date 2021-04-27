@@ -29,10 +29,6 @@ class dedupe:
 		print('Matches stats:')
 		print('\t# regions = ' + str(len(results)) + ', # records = ' + str(sum(list(map(get_region_size, results)))) + ', Region Size: Avg = ' + str(statistics.mean(list(map(get_region_size, results)))) + ', Min = ' + str(min(list(map(get_region_size, results)))) + ', Max = ' + str(max(list(map(get_region_size, results)))))
 		print('\tTotal matches = ' + str(sum(list(map(get_num_region_matches, results)))) + ', By Region: Avg = ' + str(statistics.mean(list(map(get_num_region_matches, results)))) + ', Min = ' + str(min(list(map(get_num_region_matches, results)))) + ', Max = ' + str(max(list(map(get_num_region_matches, results)))))
-		matches = []  # aggregating all items before clustering might allow us to merge when logical cluster cross multiple regions (todo)
-		try:
-			matches = list(np.concatenate(list(filter(lambda x: x, list(map(get_matches, results))))))  # note: empty list gets evaludated to false
-		except:  # in case no matches
-			pass
+		matches = list(np.concatenate(list(filter(lambda x: x, list(map(get_matches, results))))))  # note: empty list gets evaludated to false
 		print('Worker processes terminated: Matches = ' + str(len(matches)))
 		return matches

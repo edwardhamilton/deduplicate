@@ -20,13 +20,14 @@ class Test_Model(unittest.TestCase):
     @utils.ignore_warnings
     def test_Fuzz(self):
         model = model_Fuzz.model_Fuzz(self.df, match_probability = .5)
-        prediction = model.predict(self.possible_matches)
+        print(self.possible_matches)
+        matches = model.run(self.possible_matches)
+        print(matches)
     @utils.ignore_warnings
     def __test_Xgboost(self):
-        model = model_Xgboost.model_Xgboost(self.df, match_probability = .5)
-        prediction = model.predict(self.possible_matches)
-        model.train(path = 'datasets', file = 'trainset.csv')
-        prediction = model.predict(self.possible_matches)
+        model = model_Xgboost.model_Xgboost(self.df, match_probability = .5, path = 'datasets', train_file = 'trainset.csv')
+        matches = model.run(self.possible_matches)
+        print(matches)
 
 
 if __name__ == '__main__':

@@ -7,20 +7,13 @@ import pandas as pd
 import os
 import utils
 import numpy as np
+import model
 
-class model_Fuzz:
+class model_Fuzz(model.model):
 	def __init__(self, df, match_probability):
-		self.df = df
-		self.match_probability = match_probability
-	def map_indices_to_rows(self, x):
-		return self.df.iloc[x.left], self.df.iloc[x.right]
-	def predict(self, df): # df has 2 columns 'left' and 'right' which index into self.df
-		if (df.empty):
-			return df
-		df = self.add_features(df)
-		df['match'] = (df.fuzz_ratio / 100.0).astype(float)    # fuzz_ratio is between 0 - 100 but predict_proba is between 0.0 and 1.0
-		df = df[df.match > self.match_probability]		# filter out bad matches
-		return df
+		super().__init__(df, match_probability)
+	def predict(self, df):
+		return (df.fuzz_ratio / 100.0).astype(float)    # fuzz_ratio is between 0 - 100 but predict_proba is between 0.0 and 1.0
 	def get_features(self, x):
 		lt, rt = self.map_indices_to_rows(x)
 		ltName = lt.entity_name.replace('_', ' ')
