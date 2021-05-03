@@ -17,24 +17,31 @@ class model_Xgboost(model.model):
 		try:
 			X = model_Xgboost.get_X(df)
 			return self.xgbc.predict_proba(X).T[1].astype(float)
-		except:
-			print('catch: 1')
-			return 0.0
-	def get_features(self, x):
-		lt, rt = super().map_indices_to_rows(x)
-		distance = utils.get_distance(lt, rt)
-		ltName = lt.entity_name.replace('_', ' ')
-		rtName = rt.entity_name.replace('_', ' ')
-		fuzz_ratio = fuzz.ratio(ltName, rtName)
-		fuzz_partial_ratio = fuzz.partial_ratio(ltName, rtName)
-		fuzz_token_set_ratio = fuzz.token_set_ratio(ltName, rtName)
-		len_ratio = abs(len(ltName) - len(rtName)) / max(len(ltName), len(rtName))
-		words_ratio = abs((ltName.count(' ') + 1) - (rtName.count(' ') + 1)) / max(ltName.count(' ') + 1, rtName.count(' ') + 1)
-		entityid_same = lt.entity_id == rt.entity_id
-		platform_same = lt.platform == rt.platform
-		return [distance, fuzz_ratio, fuzz_partial_ratio, fuzz_token_set_ratio, len_ratio, words_ratio, entityid_same, platform_same]
+		except Exception as e:
+			print(e.message, e.args)
+		return 0.0
+	def get_features(self, left, right):
+		try:
+			lt, rt = super().map_indices_to_rows(left, right)
+			distance = utils.get_distance(lt, rt)
+			ltName = lt.standardized_name.replace('_', ' ')
+			rtName = rt.standardized_name.replace('_', ' ')
+			fuzz_ratio = fuzz.ratio(ltName, rtName)
+			fuzz_partial_ratio = fuzz.partial_ratio(ltName, rtName)
+			fuzz_token_set_ratio = fuzz.token_set_ratio(ltName, rtName)
+			len_ratio = abs(len(ltName) - len(rtName)) / max(len(ltName), len(rtName))
+			words_ratio = abs((ltName.count(' ') + 1) - (rtName.count(' ') + 1)) / max(ltName.count(' ') + 1, rtName.count(' ') + 1)
+			entityid_same = lt.entity_id == rt.entity_id
+			platform_same = lt.platform == rt.platform
+			return [distance, fuzz_ratio, fuzz_partial_ratio, fuzz_token_set_ratio, len_ratio, words_ratio, entityid_same, platform_same]
+		except Exception as e:
+			print(e)
+			print(lt.standardized_name, rt.standardized_name)
+			raise e
 	def add_features(self, df):
-		return utils.apply(df, self.get_features, {'distance':float, 'fuzz_ratio':int, 'fuzz_partial_ratio':int, 'fuzz_token_set_ratio':int, 'len_ratio':float, 'words_ratio':float, 'entityid_same':bool, 'platform_same':bool})
+		def get_features(x):
+			return self.get_features(x.left, x.right)
+		return utils.apply(df, get_features, {'distance':float, 'fuzz_ratio':int, 'fuzz_partial_ratio':int, 'fuzz_token_set_ratio':int, 'len_ratio':float, 'words_ratio':float, 'entityid_same':bool, 'platform_same':bool})
 	def get_X(df):
 		try:
 			return df[['distance', 'fuzz_ratio', 'fuzz_partial_ratio', 'fuzz_token_set_ratio', 'len_ratio', 'words_ratio', 'entityid_same', 'platform_same']]

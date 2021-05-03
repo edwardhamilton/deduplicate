@@ -59,8 +59,8 @@ def apply(df, func, columns):
 		tf.columns = list(columns.keys())
 		df = df.merge(tf, left_index=True, right_index=True)
 		return df.astype(columns)
-	except:
-		print('except: in apply')
+	except Exception as e:
+		print(e)
 		print(df)
 		return df
 

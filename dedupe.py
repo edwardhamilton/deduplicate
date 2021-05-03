@@ -10,12 +10,12 @@ class dedupe:
 		self.df = data
 		self.partition = partition
 		self.match = match
-	def run(self, num_processes, sample = None):  #assigns a same cluster # to records that are the same business entity
+	def get_matches(self, num_processes, sample = None):
 		job = utils.sample_index(self.df, sample)
 		partitions_results = parallelize.parallelize(num_processes, map=self.partition, reduce=self.match).run(job)
-		matches = dedupe.collect_matches(partitions_results)
-		clusters = cluster.cluster(self.df, cluster='cluster', to='to', match='match').run(matches)
-		return clusters
+		return dedupe.collect_matches(partitions_results)
+	def run(self, num_processes, sample = None):  #assigns a same cluster # to records that are the same business entity
+		return cluster.cluster(self.df, cluster='cluster', to='to', match='match').run(self.get_matches(num_processes, sample))
 	def collect_matches(results):
 		# empty the results queue and then kill processes
 		def get_region_size(r):
@@ -23,6 +23,8 @@ class dedupe:
 		def get_num_region_matches(r):
 			return len(r[1])
 		def get_matches(r):
+			if (len(r) == 0):
+				return []
 			return r[1]
 		def get_num_region_matches(r):
 			return len(r[1])

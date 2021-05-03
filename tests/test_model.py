@@ -24,7 +24,7 @@ class Test_Model(unittest.TestCase):
         matches = model.run(self.possible_matches)
         print(matches)
     @utils.ignore_warnings
-    def __test_Xgboost(self):
+    def test_Xgboost(self):
         model = model_Xgboost.model_Xgboost(self.df, match_probability = .5, path = 'datasets', train_file = 'trainset.csv')
         matches = model.run(self.possible_matches)
         print(matches)
