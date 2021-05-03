@@ -48,7 +48,7 @@ class Test_Labeler(unittest.TestCase):
 			pair_labeler=pair_labeler, path=self.path, train_file=self.train_file, sample=10000).run()
 	@utils.ignore_warnings
 	def test_manual_labeler(self):
-		pair_labeler = manual_labeler.manual_labeler(self.model)
+		pair_labeler = manual_labeler.manual_labeler()
 		labeler.labeler(num_processes=1, data=self.df,
 			dedupe=self.dedupe,
 			pair_labeler=pair_labeler, path=self.path, train_file=self.train_file, sample=10000).run()

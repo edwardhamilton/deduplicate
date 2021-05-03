@@ -9,8 +9,8 @@ class LABEL(Enum):
 	ERROR = auto()
 
 class pair_labeler:
-	def __init__(self, model):
-		self.model = model
+	def __init__(self):
+		pass
 	def run(self, left, right, match):  #labeled_pairs is list of pairs already labeled once we consider a pair we want to add it here
 		raise NotImplementedError
 
@@ -19,6 +19,7 @@ class labeler:
 	def __init__(self, num_processes, data, dedupe, pair_labeler, path, train_file, sample):
 		self.num_processes, self.df, self.dedupe, self.pair_labeler, self.path, self.train_file, self.sample = num_processes, data, dedupe, pair_labeler, path, train_file, sample
 		self.pair_labeler.parent = self
+		self.pair_labeler.model = dedupe.match.model
 		self.num_matches = 0
 		self.num_notmatches = 0
 		self.num_badrecords = 0
@@ -53,7 +54,7 @@ class labeler:
 			right = int(row.right)
 			if (self.pair_needs_labeling(left, right)):
 				print('pair needs labeling')
-				if (self.label_row(left, right, row.match) == False):
+				if (self.label_row(row) == False):
 					print('done')
 					break; # done
 			else:
@@ -67,10 +68,10 @@ class labeler:
 	def get_label(self, left, right):
 		raise NotImplementedError
 
-	def label_row(self, left, right, match):
-		label = self.pair_labeler.run(left, right, match)
+	def label_row(self, row):
+		label = self.pair_labeler.run(int(row.left), int(row.right), float(row.match))
 		if (label == LABEL.MATCH):
-			self.label_match(match)
+			self.label_match(row)
 		elif (label == LABEL.NOT_MATCH):
 			self.label_notmatch(match)
 		elif (label == LABEL.BAD_RECORD):
@@ -81,27 +82,27 @@ class labeler:
 			self.num_possible_matches_left = self.num_possible_matches_left - 1
 		return True
 
-	def create_labeled_training_row(match):
-		return {'left': left, 'right': right, 'distance': distance, 'match':match}
-	def label_match(self, match):
+	def create_labeled_training_row(left, right, match):
+		return {'left': left, 'right': right, 'match':match}
+	def label_match(self, row):
 		self.num_matches = self.num_matches + 1
-		weight = abs(self.match_probability - match)
+		weight = abs(self.match_probability - row.match)
 		self.total_weight = self.total_weight + weight
-		if (match < self.match_probability):
+		if (row.match < self.match_probability):
 			self.false_negatives = self.false_negatives + weight
-		self.tf = self.tf.append(self.create_labeled_training_row('T'), ignore_index=True)
+		self.tf = self.tf.append(labeler.create_labeled_training_row(row.left, row.right, 'T'), ignore_index=True)
 		self.num_possible_matches_left = self.num_possible_matches_left - 1
 		print('\t\t  ******* MATCH ************(' + str(self.num_matches) + ')\t\t\t\t' + str(self.num_possible_matches_left) + ' left: false negatives = ' + str(int((self.false_negatives * 100.0) / self.total_weight)) + '%')
-	def label_notmatch(self, row, match):
+	def label_notmatch(self, row):
 		self.num_notmatches = num_notmatches + 1
 		weight = abs(match - self.dedupe.match_probability)
 		self.total_weight = self.total_weight + weight
-		if (match > self.match_probability):
+		if (row.match > self.match_probability):
 			self.false_positives = self.false_positives + weight
-		self.tf = self.tf.append(self.create_labeled_training_row('F'), ignore_index=True)
+		self.tf = self.tf.append(labeler.create_labeled_training_row(row.left, row.right, 'F'), ignore_index=True)
 		self.num_possible_matches_left = self.num_possible_matches_left - 1
 		print('\t\t  ------- NOT --------------(' + str(self.num_notmatches) + ')\t\t\t\t' + str(self.num_possible_matches_left) + ' left: false positives = ' + str(int((self.false_positives * 100.0) / self.total_weight)) + '%')
-	def label_badrecord(self, row, match):
+	def label_badrecord(self, row):
 		self.num_badrecords = self.num_badrecords + 1
 		self.num_possible_matches_left = self.num_possible_matches_left - 1
 		print('\t\t  ------- BAD RECORD ------(' + str(self.num_bad_records) + ') -- NOT YET IMPLEMENTED\t\t\t\t' + str(self.num_possible_matches_left) + ' left')

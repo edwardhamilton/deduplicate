@@ -3,14 +3,15 @@ import labeler
 import model
 
 class manual_labeler(labeler.pair_labeler):
-	def __init__(self, model):
-		super().__init__(model)
+	def __init__(self):
+		super().__init__()
 	def run(self, left, right, match):
 		print('label manually')
 		self.present_pair_characteristics_to_user(left, right, match)
 		return self.get_label_from_user()
 	def present_pair_characteristics_to_user(self, left, right, match):
 		booleanSameDict = {True: 'SAME', False: 'DIFFERENT'}
+		print(left, right, match)
 		distance, fuzz_ratio, fuzz_partial_ratio, fuzz_token_set_ratio, len_ratio, words_ratio, restaurantid_same, platform_same = self.model.get_features(left, right)
 		self.parent.labeled_pairs.add(self.parent.make_name_pair(left, right))
 		print('\tDistance = ' + str(distance) + 'm , RestaurantId = ' + booleanSameDict[restaurantid_same] + ', Platform = ' + booleanSameDict[platform_same] + ', Match = ' + str(int(match * 100.0)) + '%')
