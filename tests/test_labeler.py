@@ -54,7 +54,7 @@ class Test_Labeler(unittest.TestCase):
 			pair_labeler=pair_labeler, path=self.path, train_file=self.train_file, sample=100000).run()
 	@utils.ignore_warnings
 	def test_manual_labeler(self):
-		YOUR_API_KEY = 'AIzaSyAsMgzumVHXhwbrFd-Blca292rJwuiCCwY'
+		YOUR_API_KEY = 'xxxxxxx'
 		google_places = GooglePlaces(YOUR_API_KEY)
 		# You may prefer to use the text_search API, instead.
 		query_result = google_places.nearby_search(lat_lng={'lat': 33.8496815, 'lng': -84.255114}, radius=150)

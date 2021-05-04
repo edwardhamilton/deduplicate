@@ -2,8 +2,6 @@ from googleplaces import GooglePlaces, types, lang
 import labeler
 import model
 import utils
-#YOUR_API_KEY = 'AIzaSyAsMgzumVHXhwbrFd-Blca292rJwuiCCwY'
-
 
 valid_types = [types.TYPE_BAKERY,types.TYPE_BAR, types.TYPE_CAFE, types.TYPE_CONVENIENCE_STORE, types.TYPE_ESTABLISHMENT, types.TYPE_FOOD, types.TYPE_LIQUOR_STORE, types.TYPE_MEAL_TAKEAWAY, types.TYPE_RESTAURANT]
 class auto_labeler(labeler.pair_labeler):
