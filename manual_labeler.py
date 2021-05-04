@@ -1,20 +1,22 @@
 from getch import getch, pause
 import labeler
 import model
-
+import auto_labeler
 class manual_labeler(labeler.pair_labeler):
 	def __init__(self):
 		super().__init__()
+		self.auto_labeler = auto_labeler.auto_labeler(API_KEY = 'AIzaSyAsMgzumVHXhwbrFd-Blca292rJwuiCCwY', radius=200)
 	def run(self, left, right, match):
 		print('label manually')
 		self.present_pair_characteristics_to_user(left, right, match)
 		return self.get_label_from_user()
 	def present_pair_characteristics_to_user(self, left, right, match):
 		booleanSameDict = {True: 'SAME', False: 'DIFFERENT'}
-		print(left, right, match)
 		distance, fuzz_ratio, fuzz_partial_ratio, fuzz_token_set_ratio, len_ratio, words_ratio, restaurantid_same, platform_same = self.model.get_features(left, right)
 		self.parent.labeled_pairs.add(self.parent.make_name_pair(left, right))
 		print('\tDistance = ' + str(distance) + 'm , RestaurantId = ' + booleanSameDict[restaurantid_same] + ', Platform = ' + booleanSameDict[platform_same] + ', Match = ' + str(int(match * 100.0)) + '%')
+		self.auto_labeler.parent = self.parent
+		self.auto_labeler.run(left, right, match)
 		print('\t' + self.parent.df.iloc[left].standardized_name.rjust(30) + '     <--->     ' + self.parent.df.iloc[right].standardized_name.ljust(30))
 	def get_label_from_user(self):
 		key = getch()

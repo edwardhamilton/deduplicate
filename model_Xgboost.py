@@ -35,12 +35,13 @@ class model_Xgboost(model.model):
 			platform_same = lt.platform == rt.platform
 			return [distance, fuzz_ratio, fuzz_partial_ratio, fuzz_token_set_ratio, len_ratio, words_ratio, entityid_same, platform_same]
 		except Exception as e:
+			print('catch: get features')
 			print(e)
 			print(lt.standardized_name, rt.standardized_name)
 			raise e
 	def add_features(self, df):
 		def get_features(x):
-			return self.get_features(x.left, x.right)
+			return self.get_features(int(x.left), int(x.right))
 		return utils.apply(df, get_features, {'distance':float, 'fuzz_ratio':int, 'fuzz_partial_ratio':int, 'fuzz_token_set_ratio':int, 'len_ratio':float, 'words_ratio':float, 'entityid_same':bool, 'platform_same':bool})
 	def get_X(df):
 		try:

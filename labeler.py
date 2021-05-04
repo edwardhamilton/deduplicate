@@ -45,11 +45,14 @@ class labeler:
 	def run(self):
 		self.load_trainingset()
 		self.possible_matches = self.generate_labeling_set()
+		print('Match: Min = ' + str(min(self.possible_matches.match)) + ', Max = ' + str(max(self.possible_matches.match)))
+		print(self.possible_matches)
 		self.num_possible_matches_left = self.possible_matches.shape[0]
 		print('Begin labeling your training set (size = ' + str(self.possible_matches.shape[0]) + '):.  You will be prompted with possible matches.  Press (m) for match or (n) for not a match.  When done press (q)')
 		self.labeled_pairs = set()
 
 		for i, row in self.possible_matches.iterrows():
+			print(row)
 			left = int(row.left)
 			right = int(row.right)
 			if (self.pair_needs_labeling(left, right)):
@@ -110,4 +113,5 @@ class labeler:
 		return self.df.iloc[left].standardized_name + '.' + self.df.iloc[right].standardized_name
 
 	def pair_needs_labeling(self, left, right):
-		return (self.make_name_pair(left, right) in self.labeled_pairs) | (self.make_name_pair(right, left) in self.labeled_pairs) | (self.df.iloc[left].standardized_name == self.df.iloc[right].standardized_name)
+		print(self.df.iloc[left].standardized_name, self.df.iloc[right].standardized_name)
+		return (self.make_name_pair(left, right) not in self.labeled_pairs) & (self.make_name_pair(right, left) not in self.labeled_pairs) & (self.df.iloc[left].standardized_name != self.df.iloc[right].standardized_name)

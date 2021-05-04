@@ -22,5 +22,5 @@ class model_Fuzz(model.model):
 		return [fuzz_ratio]
 	def add_features(self, df):
 		def get_features(x):
-			return self.get_features(x.left, x.right)
+			return self.get_features(int(x.left), int(x.right))
 		return utils.apply(df, get_features, {'fuzz_ratio':int})

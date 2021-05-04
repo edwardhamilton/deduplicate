@@ -7,6 +7,12 @@ import math
 import sys
 import helpers
 import os
+from googleplaces import GooglePlaces, types, lang
+import ssl
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 sys.path.append('../')
 import dedupe
 import utils
@@ -45,9 +51,14 @@ class Test_Labeler(unittest.TestCase):
 		pair_labeler = null_labeler()
 		labeler.labeler(num_processes=1, data=self.df,
 			dedupe=self.dedupe,
-			pair_labeler=pair_labeler, path=self.path, train_file=self.train_file, sample=10000).run()
+			pair_labeler=pair_labeler, path=self.path, train_file=self.train_file, sample=100000).run()
 	@utils.ignore_warnings
 	def test_manual_labeler(self):
+		YOUR_API_KEY = 'AIzaSyAsMgzumVHXhwbrFd-Blca292rJwuiCCwY'
+		google_places = GooglePlaces(YOUR_API_KEY)
+		# You may prefer to use the text_search API, instead.
+		query_result = google_places.nearby_search(lat_lng={'lat': 33.8496815, 'lng': -84.255114}, radius=150)
+		print(query_result.places)
 		pair_labeler = manual_labeler.manual_labeler()
 		labeler.labeler(num_processes=1, data=self.df,
 			dedupe=self.dedupe,

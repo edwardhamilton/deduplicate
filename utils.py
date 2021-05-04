@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from random import random
 import warnings
+from fuzzywuzzy import fuzz
 
 def sample_index(df, sample = None):
 	return list(df.sample(sample).index if (sample != None) else df.index)
@@ -16,7 +17,9 @@ def ignore_warnings(test_func):
             test_func(self, *args, **kwargs)
     return do_test
 
-
+def average(a, b):
+  return (a + b) / 2.0
+  
 #todo need to add this back in otherwise clustering will not be correct
 def order_pair(left, right):  # this makes it easier to assign cluster id, as first in match pair.
 	if (left <= right):
@@ -51,6 +54,10 @@ def is_outofrange(f, t, x):
 	return (x < f) | (x > t)
 def get_distance(lt, rt):
 	return int(haversine(lt.longitude, lt.latitude, rt.longitude, rt.latitude) * 1000.0)
+def best_places_match(places, value):
+	comparisons = list(map(lambda x: (x.name, fuzz.ratio(x.name, value)), places))
+	return reduce(lambda a, b: a if (a[1] > b[1]) else b, comparisons)
+
 
 def apply(df, func, columns):
 	try:
@@ -60,6 +67,7 @@ def apply(df, func, columns):
 		df = df.merge(tf, left_index=True, right_index=True)
 		return df.astype(columns)
 	except Exception as e:
+		print('catch7')
 		print(e)
 		print(df)
 		return df
